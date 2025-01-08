@@ -86,16 +86,16 @@ class EducationalBot:
         )
         return completion.choices[0].message.content
     
-    def dictionary_lookup(word:str)->str:
+    def dictionary_lookup(sefl,word:str)->str:
         response=requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}")
         response.raise_for_status()
         data=response.json()
         return data[0]["meanings"][0]["definitions"][0]["definition"]
 
-    def wikipedia(topic:str)->str:
+    def wikipedia(self,topic:str)->str:
        return wikipedia.summary(topic,sentences=10)
 
-    def grammar_check(text:str)->str:
+    def grammar_check(self,text:str)->str:
         response=requests.post("https://api.languagetool.org/v2/check",params={"text":text,"language":"en-US"})
         response.raise_for_status()
         data=response.json()
@@ -109,7 +109,6 @@ class EducationalBot:
        while i<max_turns:
         i+=1
         result=bot(next_prompt)
-        print(result)
         actions=[action_re.match(a)for a in result.split('\n')if action_re.match(a)]
         if actions:
             action,action_input=actions[0].groups()
@@ -117,6 +116,7 @@ class EducationalBot:
                 raise Exception(f"Unknown action :{action}:{action_input}")
             print(f"--running {action} {action_input}")
             observation=self.known_action[action](action_input)
-            print(f"Observations:{observation}")
+            next_prompt=f"Observation:{observation}"
         else:
-            return
+            return result
+        return result
